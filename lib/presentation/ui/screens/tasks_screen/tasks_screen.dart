@@ -28,27 +28,32 @@ class TasksScreenState extends State<TasksScreen> {
       body: CustomPadding(
         child: BlocBuilder<ExpansionCubit, ExpansionState>(
           builder: (context, state) {
-            return Column(
-              children: [
-                const SizedBox(height: 20),
-                ...List.generate(
-                  DatabaseTasks.categories.length,
-                  (index) => _getExpansionTiles(
-                    currentIndex: index,
-                    isRightTile: index == 0 ? true : false,
-                    onTap: () {
-                      if (index ==
-                          context.read<ExpansionCubit>().ExpandedIndex) {
-                        context.read<ExpansionCubit>().clear();
-                      } else {
-                        context.read<ExpansionCubit>().expand(index: index);
-                      }
-                    },
-                    activeIndex: context.read<ExpansionCubit>().ExpandedIndex,
-                    label: DatabaseTasks.categories[index].name,
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  ...List.generate(
+                    DatabaseTasks.categories.length,
+                    (index) => _getExpansionTiles(
+                      currentIndex: index,
+                      isRightTile: index == 0 ? true : false,
+                      onTap: () {
+                        if (context
+                            .read<ExpansionCubit>()
+                            .openTilesIndexes
+                            .contains(index)) {
+                          context.read<ExpansionCubit>().clearTile(index);
+                        } else {
+                          context.read<ExpansionCubit>().expand(index: index);
+                        }
+                      },
+                      activeIndex: context.read<ExpansionCubit>().expandedIndex,
+                      label: DatabaseTasks.categories[index].name,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),
@@ -113,19 +118,26 @@ class TasksScreenState extends State<TasksScreen> {
     bool isRightTile = false,
   }) =>
       Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Container(
             margin: const EdgeInsets.symmetric(
               vertical: 15,
+              horizontal: 2,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             width: double.infinity,
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
                     color: Colors.black.withOpacity(0.3),
                     blurRadius: 5,
-                    spreadRadius: 2),
+                    spreadRadius: context
+                            .read<ExpansionCubit>()
+                            .openTilesIndexes
+                            .contains(currentIndex)
+                        ? 7
+                        : 2),
               ],
               color: AppColors.darkPurple,
               borderRadius: BorderRadius.circular(10),
@@ -200,20 +212,28 @@ class TasksScreenState extends State<TasksScreen> {
               ],
             ),
           ),
-          if (currentIndex == activeIndex) ...{
+          if (context
+              .read<ExpansionCubit>()
+              .openTilesIndexes
+              .contains(currentIndex)) ...{
             ...List.generate(
-              DatabaseTasks.categories[currentIndex].tasks.length,
+              (context.read<ExpansionCubit>().seeMore.contains(currentIndex) &&
+                      DatabaseTasks.categories[currentIndex].tasks.length > 3)
+                  ? DatabaseTasks.categories[currentIndex].tasks.length
+                  : (DatabaseTasks.categories[currentIndex].tasks.length > 3)
+                      ? 3
+                      : DatabaseTasks.categories[currentIndex].tasks.length,
               (index) => Container(
                 margin: const EdgeInsets.symmetric(
-                  vertical: 8,
+                  vertical: 10,
                 ),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                 width: double.infinity,
                 decoration: BoxDecoration(
                   boxShadow: [
                     BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withOpacity(.3),
                         blurRadius: 5,
                         spreadRadius: 2),
                   ],
@@ -228,7 +248,7 @@ class TasksScreenState extends State<TasksScreen> {
                       children: [
                         SvgPicture.asset(AppIcons.seemoreIcon),
                         const SizedBox(
-                          width: 16,
+                          width: 10,
                         ),
                         Text(
                           DatabaseTasks
@@ -240,18 +260,59 @@ class TasksScreenState extends State<TasksScreen> {
                     Row(
                       children: [
                         Text(
-                          DatabaseTasks
-                              .categories[currentIndex].tasks[index].time,
+                          '${DatabaseTasks.categories[currentIndex].tasks[index].time.day}/${DatabaseTasks.categories[currentIndex].tasks[index].time.month}/${DatabaseTasks.categories[currentIndex].tasks[index].time.year}',
                         ),
+                        const SizedBox(width: 26),
+                        SvgPicture.asset(
+                          AppIcons.tickIcon,
+                          colorFilter: ColorFilter.mode(
+                              DatabaseTasks.categories[currentIndex].tasks
+                                          .length <=
+                                      3
+                                  ? AppColors.tickColors[index]
+                                  : AppColors.tickColors[index % 3],
+                              BlendMode.srcIn),
+                        ),
+                        const SizedBox(width: 26),
+                        SvgPicture.asset(AppIcons.addIcon),
                       ],
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(
-              height: 40,
-            )
+            if (DatabaseTasks.categories[currentIndex].tasks.length > 3 &&
+                context.read<ExpansionCubit>().seeMore.contains(currentIndex) ==
+                    false) ...{
+              GestureDetector(
+                onTap: () {
+                  context.read<ExpansionCubit>().showMore(index: currentIndex);
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'See More',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(width: 8),
+                      SvgPicture.asset(AppIcons.moreIcon),
+                    ],
+                  ),
+                ),
+              ),
+            },
+            if (DatabaseTasks.categories[currentIndex].tasks.length <= 3 ||
+                context.read<ExpansionCubit>().seeMore.contains(currentIndex) ==
+                    true) ...{
+              const SizedBox(
+                height: 20,
+              ),
+            },
+            const SizedBox(height: 12),
           },
         ],
       );

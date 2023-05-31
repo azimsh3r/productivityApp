@@ -1,18 +1,31 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:flutter/material.dart';
 
 part 'expansion_state.dart';
 
 class ExpansionCubit extends Cubit<ExpansionState> {
   ExpansionCubit() : super(ExpansionInitial());
-  int ExpandedIndex = -1;
+
+  int expandedIndex = -1;
+  List<int> openTilesIndexes = [];
+  List<int> seeMore = [];
+
+  showMore({required int index}) {
+    seeMore.add(index);
+    emit(ExpansionShowAll());
+  }
+
   void expand({required int index}) {
-    ExpandedIndex = index;
+    expandedIndex = index;
+    openTilesIndexes.add(index);
     emit(ExpansionChanged());
   }
 
-  void clear() {
-    ExpandedIndex = -1;
+  void clearTile(int currentIndex) {
+    openTilesIndexes.remove(currentIndex);
+    seeMore.remove(currentIndex);
+    expandedIndex = -1;
     emit(ExpansionChanged());
   }
 }

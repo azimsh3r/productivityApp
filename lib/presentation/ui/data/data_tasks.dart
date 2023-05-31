@@ -1,6 +1,17 @@
 class DatabaseTasks {
   static List<Category> categories = [
     Category(
+      name: 'Categories',
+      tasks: [
+        Task(name: 'Do the Job', time: DateTime(2022, 12, 29)),
+        Task(name: 'Go sleep', time: DateTime(2022)),
+        Task(name: 'Do the Job', time: DateTime(2022, 12, 29)),
+        Task(name: 'Go sleep', time: DateTime(2022)),
+        Task(name: 'Do the Job', time: DateTime(2022, 12, 29)),
+        Task(name: 'Go sleep', time: DateTime(2022)),
+      ],
+    ),
+    Category(
       name: 'Previous tasks',
       tasks: [
         Task(name: 'Do the Job', time: DateTime(2022)),
