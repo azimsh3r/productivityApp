@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import 'package:flutter/material.dart';
+import 'package:productivityapp/presentation/data/data_tasks.dart';
 
 part 'expansion_state.dart';
 
@@ -26,6 +27,18 @@ class ExpansionCubit extends Cubit<ExpansionState> {
     openTilesIndexes.remove(currentIndex);
     seeMore.remove(currentIndex);
     expandedIndex = -1;
+    emit(ExpansionChanged());
+  }
+
+  void addCategoryTasks({required String title}) {
+    if (title.isNotEmpty) {
+      DatabaseTasks.categories.add(
+        Category(
+          name: title,
+          tasks: [],
+        ),
+      );
+    }
     emit(ExpansionChanged());
   }
 }

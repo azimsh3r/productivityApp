@@ -1,4 +1,4 @@
-class DatabaseTasks {
+abstract class DatabaseTasks {
   static List<Category> categories = [
     Category(
       name: 'Categories',

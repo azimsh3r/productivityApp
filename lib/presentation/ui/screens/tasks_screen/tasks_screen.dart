@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:productivityapp/presentation/data/data_tasks.dart';
+import 'package:productivityapp/presentation/state/categories_management/categories_cubit.dart';
 import 'package:productivityapp/presentation/state/tasks_cubit_expansion_tile/expansion_cubit.dart';
-import 'package:productivityapp/presentation/ui/data/data_tasks.dart';
 import 'package:productivityapp/presentation/ui/resources/app_colors.dart';
 import 'package:productivityapp/presentation/ui/resources/app_icons.dart';
 import 'package:productivityapp/presentation/ui/resources/app_images.dart';
@@ -18,45 +19,77 @@ class TasksScreen extends StatefulWidget {
   }
 }
 
-class TasksScreenState extends State<TasksScreen> {
+class TasksScreenState extends State<TasksScreen>
+    with TickerProviderStateMixin {
   bool isOpen = false;
+  TextEditingController controllerTitle = TextEditingController();
+  late Animation<Offset> animation;
+  late AnimationController animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    );
+    animation =
+        Tween<Offset>(begin: const Offset(0, -0.05), end: const Offset(0, 0))
+            .animate(animationController);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controllerTitle.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _getAppBar(),
-      body: CustomPadding(
-        child: BlocBuilder<ExpansionCubit, ExpansionState>(
-          builder: (context, state) {
-            return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  ...List.generate(
-                    DatabaseTasks.categories.length,
-                    (index) => _getExpansionTiles(
-                      currentIndex: index,
-                      isRightTile: index == 0 ? true : false,
-                      onTap: () {
-                        if (context
-                            .read<ExpansionCubit>()
-                            .openTilesIndexes
-                            .contains(index)) {
-                          context.read<ExpansionCubit>().clearTile(index);
-                        } else {
-                          context.read<ExpansionCubit>().expand(index: index);
-                        }
-                      },
-                      activeIndex: context.read<ExpansionCubit>().expandedIndex,
-                      label: DatabaseTasks.categories[index].name,
-                    ),
+      body: BlocBuilder<CategoriesCubit, CategoriesState>(
+        builder: (context, state) {
+          return CustomPadding(
+            child: BlocBuilder<ExpansionCubit, ExpansionState>(
+              builder: (context, state) {
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      ...List.generate(
+                        DatabaseTasks.categories.length,
+                        (index) => _getExpansionTiles(
+                          currentIndex: index,
+                          isRightTile: index == 0 ? true : false,
+                          onTap: () {
+                            if (context
+                                .read<ExpansionCubit>()
+                                .openTilesIndexes
+                                .contains(index)) {
+                              animationController.reverse();
+
+                              context.read<ExpansionCubit>().clearTile(index);
+                            } else {
+                              context
+                                  .read<ExpansionCubit>()
+                                  .expand(index: index);
+                              animationController.forward();
+                            }
+                          },
+                          activeIndex:
+                              context.read<ExpansionCubit>().expandedIndex,
+                          label: DatabaseTasks.categories[index].name,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
@@ -153,12 +186,59 @@ class TasksScreenState extends State<TasksScreen> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SvgPicture.asset(
-                        AppIcons.addIcon,
-                        width: 15,
+                      InkWell(
+                        onTap: () {
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return Dialog(
+                                  backgroundColor: Colors.transparent,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 30,
+                                    ),
+                                    height: 240,
+                                    decoration: BoxDecoration(
+                                        color: AppColors.darkPurple,
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Create New Category',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleSmall,
+                                        ),
+                                        TextField(
+                                          controller: controllerTitle,
+                                          textInputAction: TextInputAction.done,
+                                          decoration: const InputDecoration(
+                                            hintText: 'Title',
+                                          ),
+                                        ),
+                                        _getDialogButtons(),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(14),
+                          child: SvgPicture.asset(
+                            AppIcons.addIcon,
+                            width: 15,
+                          ),
+                        ),
                       ),
                       const SizedBox(
-                        width: 30,
+                        width: 15,
                       ),
                       InkWell(
                         onTap: onTap,
@@ -212,6 +292,66 @@ class TasksScreenState extends State<TasksScreen> {
               ],
             ),
           ),
+          SlideTransition(
+            position: animation,
+            child: _getTasks(currentIndex: currentIndex),
+          ),
+        ],
+      );
+
+  _getDialogButtons() => Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          InkWell(
+            onTap: () {
+              Navigator.pop(context);
+              controllerTitle.clear();
+            },
+            child: Container(
+              width: 88,
+              height: 42,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundColor,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: AppColors.enabledPurple,
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                'Cancel',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          InkWell(
+            onTap: () {
+              context
+                  .read<CategoriesCubit>()
+                  .addCategoryTasks(title: controllerTitle.text);
+              Navigator.pop(context);
+              controllerTitle.clear();
+            },
+            child: Container(
+              width: 88,
+              height: 42,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.enabledPurple,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                'Done',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+          ),
+        ],
+      );
+  _getTasks({required int currentIndex}) => Column(
+        children: [
           if (context
               .read<ExpansionCubit>()
               .openTilesIndexes
@@ -284,7 +424,7 @@ class TasksScreenState extends State<TasksScreen> {
             if (DatabaseTasks.categories[currentIndex].tasks.length > 3 &&
                 context.read<ExpansionCubit>().seeMore.contains(currentIndex) ==
                     false) ...{
-              GestureDetector(
+              InkWell(
                 onTap: () {
                   context.read<ExpansionCubit>().showMore(index: currentIndex);
                 },
