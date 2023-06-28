@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:productivityapp/presentation/state/categories_management/categories_cubit.dart';
+import 'package:productivityapp/presentation/state/navigation/navigation_cubit.dart';
 import 'package:productivityapp/presentation/state/tasks_cubit_expansion_tile/expansion_cubit.dart';
+import 'package:productivityapp/presentation/ui/screens/navigation_screen/navigation_screen.dart';
 import 'package:productivityapp/presentation/ui/screens/tasks_screen/tasks_screen.dart';
 import 'package:productivityapp/presentation/ui/themes/themes.dart';
 
@@ -17,6 +19,9 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
+          create: (context) => NavigationCubit(),
+        ),
+        BlocProvider(
           create: (context) => ExpansionCubit(),
         ),
         BlocProvider(
@@ -27,7 +32,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         theme: AppTheme.dark(),
-        home: const TasksScreen(),
+        home: const NavigationScreen(),
       ),
     );
   }

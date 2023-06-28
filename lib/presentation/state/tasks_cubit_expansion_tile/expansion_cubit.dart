@@ -3,12 +3,14 @@ import 'package:meta/meta.dart';
 import 'package:flutter/material.dart';
 import 'package:productivityapp/presentation/data/data_tasks.dart';
 
+import '../../data/taskType.dart';
+
 part 'expansion_state.dart';
 
 class ExpansionCubit extends Cubit<ExpansionState> {
   ExpansionCubit() : super(ExpansionInitial());
 
-  int expandedIndex = -1;
+  int expandedIndex = -3;
   List<int> openTilesIndexes = [];
   List<int> seeMore = [];
 
@@ -26,14 +28,14 @@ class ExpansionCubit extends Cubit<ExpansionState> {
   void clearTile(int currentIndex) {
     openTilesIndexes.remove(currentIndex);
     seeMore.remove(currentIndex);
-    expandedIndex = -1;
+    expandedIndex = -3;
     emit(ExpansionChanged());
   }
 
   void addCategoryTasks({required String title}) {
     if (title.isNotEmpty) {
-      DatabaseTasks.categories.add(
-        Category(
+      DataTasks.taskTypes.add(
+        TaskType(
           name: title,
           tasks: [],
         ),

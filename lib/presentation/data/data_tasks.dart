@@ -1,61 +1,57 @@
-abstract class DatabaseTasks {
+import 'package:flutter/material.dart';
+import 'package:productivityapp/presentation/data/task.dart';
+import 'package:productivityapp/presentation/data/taskType.dart';
+import 'category.dart';
+
+abstract class DataTasks {
   static List<Category> categories = [
     Category(
-      name: 'Categories',
-      tasks: [
-        Task(name: 'Do the Job', time: DateTime(2022, 12, 29)),
-        Task(name: 'Go sleep', time: DateTime(2022)),
-        Task(name: 'Do the Job', time: DateTime(2022, 12, 29)),
-        Task(name: 'Go sleep', time: DateTime(2022)),
-        Task(name: 'Do the Job', time: DateTime(2022, 12, 29)),
-        Task(name: 'Go sleep', time: DateTime(2022)),
-      ],
+      color: Colors.pink,
+      title: 'All Tasks',
+      iconData: Icons.list_alt_outlined,
+      tasks: [],
     ),
     Category(
-      name: 'Previous tasks',
-      tasks: [
-        Task(name: 'Do the Job', time: DateTime(2022)),
-        Task(name: 'Go sleep', time: DateTime(2022)),
-      ],
+      color: Colors.blueAccent,
+      title: 'Work',
+      iconData: Icons.work,
+      tasks: [],
     ),
     Category(
-      name: 'Previous tasks',
-      tasks: [
-        Task(name: 'Do the Job2', time: DateTime(2022)),
-        Task(name: 'Go sleep2', time: DateTime(2022)),
-      ],
+      color: Colors.yellowAccent,
+      title: 'Personal',
+      iconData: Icons.person,
+      tasks: [],
     ),
     Category(
-      name: 'Today tasks',
-      tasks: [
-        Task(name: 'Do the Job3', time: DateTime(2022)),
-        Task(name: 'Go sleep3', time: DateTime(2022)),
-      ],
+      color: Colors.purple,
+      title: 'Birthday',
+      iconData: Icons.cake_outlined,
+      tasks: [],
     ),
     Category(
-      name: 'Completed tasks',
-      tasks: [
-        Task(name: 'Do the Job4', time: DateTime(2022)),
-        Task(name: 'Go sleep4', time: DateTime(2022)),
-      ],
+      color: Colors.green,
+      title: 'Wishlist',
+      iconData: Icons.format_list_bulleted_outlined,
+      tasks: [],
     ),
   ];
-}
-
-class Task {
-  Task({
-    required this.name,
-    required this.time,
-  });
-  String name;
-  DateTime time;
-}
-
-class Category {
-  Category({
-    required this.name,
-    required this.tasks,
-  });
-  String name;
-  List<Task> tasks;
+  static List<TaskType> taskTypes = [
+    TaskType(
+      name: 'Previous tasks',
+      tasks: [],
+    ),
+    TaskType(
+      name: 'Previous tasks',
+      tasks: [],
+    ),
+    TaskType(
+      name: 'Today tasks',
+      tasks: [],
+    ),
+    TaskType(
+      name: 'Completed tasks',
+      tasks: [],
+    ),
+  ];
 }

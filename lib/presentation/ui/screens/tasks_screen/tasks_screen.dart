@@ -58,11 +58,11 @@ class TasksScreenState extends State<TasksScreen>
                   child: Column(
                     children: [
                       const SizedBox(height: 20),
+                      _getCategoriesTile(),
                       ...List.generate(
-                        DatabaseTasks.categories.length,
+                        DataTasks.taskTypes.length,
                         (index) => _getExpansionTiles(
                           currentIndex: index,
-                          isRightTile: index == 0 ? true : false,
                           onTap: () {
                             if (context
                                 .read<ExpansionCubit>()
@@ -80,7 +80,7 @@ class TasksScreenState extends State<TasksScreen>
                           },
                           activeIndex:
                               context.read<ExpansionCubit>().expandedIndex,
-                          label: DatabaseTasks.categories[index].name,
+                          label: DataTasks.taskTypes[index].name,
                         ),
                       ),
                     ],
@@ -143,12 +143,249 @@ class TasksScreenState extends State<TasksScreen>
           ),
         ),
       );
+  _getCategoriesTile() => Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Container(
+            margin: const EdgeInsets.symmetric(
+              vertical: 15,
+              horizontal: 2,
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 5,
+                    spreadRadius: context
+                            .read<ExpansionCubit>()
+                            .openTilesIndexes
+                            .contains(-1)
+                        ? 7
+                        : 2),
+              ],
+              color: AppColors.darkPurple,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Categories',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return Dialog(
+                                backgroundColor: Colors.transparent,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 30,
+                                  ),
+                                  height: 240,
+                                  decoration: BoxDecoration(
+                                      color: AppColors.darkPurple,
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: Column(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Create New Category',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleSmall,
+                                      ),
+                                      TextField(
+                                        controller: controllerTitle,
+                                        textInputAction: TextInputAction.done,
+                                        decoration: const InputDecoration(
+                                          hintText: 'Title',
+                                        ),
+                                      ),
+                                      _getDialogButtons(),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        child: SvgPicture.asset(
+                          AppIcons.addIcon,
+                          width: 15,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        if (context
+                            .read<ExpansionCubit>()
+                            .openTilesIndexes
+                            .contains(-1)) {
+                          context.read<ExpansionCubit>().clearTile(-1);
+                        } else {
+                          context.read<ExpansionCubit>().expand(index: -1);
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.only(
+                          top: 14,
+                          bottom: 14,
+                          left: 14,
+                        ),
+                        child: context
+                                .read<ExpansionCubit>()
+                                .openTilesIndexes
+                                .contains(-1)
+                            ? RotationTransition(
+                                turns: const AlwaysStoppedAnimation(180 / 360),
+                                child: SvgPicture.asset(
+                                  AppIcons.moreIcon,
+                                  width: 18,
+                                ),
+                              )
+                            : SvgPicture.asset(
+                                AppIcons.moreIcon,
+                                width: 18,
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          if (context.read<ExpansionCubit>().openTilesIndexes.contains(-1)) ...{
+            Wrap(
+              children: [
+                ...List.generate(
+                  context.read<ExpansionCubit>().seeMore.contains(-1)
+                      ? DataTasks.categories.length
+                      : 5,
+                  (index) => GestureDetector(
+                    onTap: () {
+                      // TODO: Add Function to open necessary Tabs
+                    },
+                    child: Stack(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 5),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              width: 0.7,
+                              color: DataTasks.categories[index].color,
+                            ),
+                            color: AppColors.darkPurple,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          width: 179,
+                          height: 70,
+                        ),
+                        Positioned(
+                          right: 0,
+                          bottom: 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                            ),
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.darkPurple,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            width: 178,
+                            height: 69,
+                            child: Row(
+                              children: [
+                                Icon(
+                                  DataTasks.categories[index].iconData,
+                                  color: DataTasks.categories[index].color,
+                                  size: 28,
+                                ),
+                                const SizedBox(
+                                  width: 8,
+                                ),
+                                Text(
+                                  DataTasks.categories[index].title,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium
+                                      ?.copyWith(
+                                        color:
+                                            DataTasks.categories[index].color,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (DataTasks.categories.length > 5 &&
+                    !context.read<ExpansionCubit>().seeMore.contains(-1)) ...{
+                  GestureDetector(
+                    onTap: () {
+                      context.read<ExpansionCubit>().showMore(index: -1);
+                    },
+                    child: Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                      ),
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.darkPurple,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      width: 178,
+                      height: 69,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SvgPicture.asset(AppIcons.moreIcon),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            'More',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                }
+              ],
+            ),
+          }
+        ],
+      );
+
   _getExpansionTiles({
     required String label,
     required void Function() onTap,
     required int activeIndex,
     required int currentIndex,
-    bool isRightTile = false,
   }) =>
       Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -182,113 +419,28 @@ class TasksScreenState extends State<TasksScreen>
                   label,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                if (isRightTile) ...{
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          showDialog(
-                              context: context,
-                              builder: (context) {
-                                return Dialog(
-                                  backgroundColor: Colors.transparent,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 30,
-                                    ),
-                                    height: 240,
-                                    decoration: BoxDecoration(
-                                        color: AppColors.darkPurple,
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Create New Category',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleSmall,
-                                        ),
-                                        TextField(
-                                          controller: controllerTitle,
-                                          textInputAction: TextInputAction.done,
-                                          decoration: const InputDecoration(
-                                            hintText: 'Title',
-                                          ),
-                                        ),
-                                        _getDialogButtons(),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(14),
-                          child: SvgPicture.asset(
-                            AppIcons.addIcon,
-                            width: 15,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 15,
-                      ),
-                      InkWell(
-                        onTap: onTap,
-                        child: Container(
-                          padding: const EdgeInsets.only(
-                            top: 14,
-                            bottom: 14,
-                            left: 14,
-                          ),
-                          child: activeIndex != currentIndex
-                              ? SvgPicture.asset(
-                                  AppIcons.moreIcon,
-                                  width: 18,
-                                )
-                              : RotationTransition(
-                                  turns:
-                                      const AlwaysStoppedAnimation(180 / 360),
-                                  child: SvgPicture.asset(
-                                    AppIcons.moreIcon,
-                                    width: 18,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ],
-                  ),
-                } else ...{
-                  InkWell(
-                    onTap: onTap,
-                    child: Container(
-                      padding: const EdgeInsets.only(
-                        top: 14,
-                        bottom: 14,
-                        left: 14,
-                      ),
-                      child: activeIndex != currentIndex
-                          ? SvgPicture.asset(
+                InkWell(
+                  onTap: onTap,
+                  child: Container(
+                    padding: const EdgeInsets.only(
+                      top: 14,
+                      bottom: 14,
+                      left: 14,
+                    ),
+                    child: activeIndex != currentIndex
+                        ? SvgPicture.asset(
+                            AppIcons.moreIcon,
+                            width: 18,
+                          )
+                        : RotationTransition(
+                            turns: const AlwaysStoppedAnimation(180 / 360),
+                            child: SvgPicture.asset(
                               AppIcons.moreIcon,
                               width: 18,
-                            )
-                          : RotationTransition(
-                              turns: const AlwaysStoppedAnimation(180 / 360),
-                              child: SvgPicture.asset(
-                                AppIcons.moreIcon,
-                                width: 18,
-                              ),
                             ),
-                    ),
+                          ),
                   ),
-                }
+                ),
               ],
             ),
           ),
@@ -330,7 +482,7 @@ class TasksScreenState extends State<TasksScreen>
             onTap: () {
               context
                   .read<CategoriesCubit>()
-                  .addCategoryTasks(title: controllerTitle.text);
+                  .addCategory(title: controllerTitle.text);
               Navigator.pop(context);
               controllerTitle.clear();
             },
@@ -358,11 +510,11 @@ class TasksScreenState extends State<TasksScreen>
               .contains(currentIndex)) ...{
             ...List.generate(
               (context.read<ExpansionCubit>().seeMore.contains(currentIndex) &&
-                      DatabaseTasks.categories[currentIndex].tasks.length > 3)
-                  ? DatabaseTasks.categories[currentIndex].tasks.length
-                  : (DatabaseTasks.categories[currentIndex].tasks.length > 3)
+                      DataTasks.taskTypes[currentIndex].tasks.length > 3)
+                  ? DataTasks.taskTypes[currentIndex].tasks.length
+                  : (DataTasks.taskTypes[currentIndex].tasks.length > 3)
                       ? 3
-                      : DatabaseTasks.categories[currentIndex].tasks.length,
+                      : DataTasks.taskTypes[currentIndex].tasks.length,
               (index) => Container(
                 margin: const EdgeInsets.symmetric(
                   vertical: 10,
@@ -391,8 +543,7 @@ class TasksScreenState extends State<TasksScreen>
                           width: 10,
                         ),
                         Text(
-                          DatabaseTasks
-                              .categories[currentIndex].tasks[index].name,
+                          DataTasks.taskTypes[currentIndex].tasks[index].name,
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ],
@@ -400,17 +551,14 @@ class TasksScreenState extends State<TasksScreen>
                     Row(
                       children: [
                         Text(
-                          '${DatabaseTasks.categories[currentIndex].tasks[index].time.day}/${DatabaseTasks.categories[currentIndex].tasks[index].time.month}/${DatabaseTasks.categories[currentIndex].tasks[index].time.year}',
+                          '${DataTasks.taskTypes[currentIndex].tasks[index].time.day}/${DataTasks.taskTypes[currentIndex].tasks[index].time.month}/${DataTasks.taskTypes[currentIndex].tasks[index].time.year}',
                         ),
                         const SizedBox(width: 26),
                         SvgPicture.asset(
                           AppIcons.tickIcon,
                           colorFilter: ColorFilter.mode(
-                              DatabaseTasks.categories[currentIndex].tasks
-                                          .length <=
-                                      3
-                                  ? AppColors.tickColors[index]
-                                  : AppColors.tickColors[index % 3],
+                              DataTasks.taskTypes[currentIndex].tasks[index]
+                                  .category.color,
                               BlendMode.srcIn),
                         ),
                         const SizedBox(width: 26),
@@ -421,7 +569,7 @@ class TasksScreenState extends State<TasksScreen>
                 ),
               ),
             ),
-            if (DatabaseTasks.categories[currentIndex].tasks.length > 3 &&
+            if (DataTasks.taskTypes[currentIndex].tasks.length > 3 &&
                 context.read<ExpansionCubit>().seeMore.contains(currentIndex) ==
                     false) ...{
               InkWell(
@@ -445,7 +593,7 @@ class TasksScreenState extends State<TasksScreen>
                 ),
               ),
             },
-            if (DatabaseTasks.categories[currentIndex].tasks.length <= 3 ||
+            if (DataTasks.taskTypes[currentIndex].tasks.length <= 3 ||
                 context.read<ExpansionCubit>().seeMore.contains(currentIndex) ==
                     true) ...{
               const SizedBox(

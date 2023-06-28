@@ -21,6 +21,12 @@ class AppTheme {
       fontSize: 16,
       fontFamily: 'MainFont',
     ),
+    titleLarge: TextStyle(
+      color: AppColors.textWhite,
+      fontWeight: FontWeight.w500,
+      fontSize: 20,
+      fontFamily: 'MainFont',
+    ),
   );
   static ThemeData dark() => ThemeData(
         fontFamily: 'MainFont',
